@@ -13,6 +13,7 @@ export const create = (
     const { title, type, userId } = JSON.parse(req.requestBody) as Partial<
       Diary
     >;
+    console.log(title)
     const exUser = schema.users.findBy({ id: userId });
     if (!exUser) {
       return handleErrors(null, 'No such user exists.');
@@ -66,7 +67,7 @@ export const addEntry = (
 export const getDiaries = (schema: any, req: Request): Diary[] | Response => {
   try {
     const user = schema.users.find(req.params.id);
-    console.log(user.diary)
+    //console.log(user.diary)
     return user.diary as Diary[];
   } catch (error) {
     return handleErrors(error, 'Could not get user diaries.');

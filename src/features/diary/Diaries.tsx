@@ -22,19 +22,7 @@ type results={
 
 
 const useStyles = makeStyles((theme) => ({
-  butt: {
-     width:'300px',
-     overflow:'hidden auto',
-     height: '100vh',
-     backgroundColor: '#ececec',
-     paddingLeft: '20px',
-     paddingRight: '20px',
-  },
-  rootlist :{
-    listStyle: 'none',
-    margin: '0',
-    padding: '0'
-  },
+  
   
 
   
@@ -60,6 +48,7 @@ const Diaries: FC = () => {
             const sortedByUpdatedAt = data.sort((a, b) => {
               return dayjs(b.updatedAt).unix() - dayjs(a.updatedAt).unix();
             });
+            console.log(sortedByUpdatedAt)
             dispatch(addDiary(sortedByUpdatedAt));
           }
         });
@@ -68,6 +57,8 @@ const Diaries: FC = () => {
 
     fetchDiaries();
   }, [dispatch, user]);
+
+
 
   const createDiary = async () => {
     const result:results = await Swal.mixin({
@@ -92,15 +83,15 @@ const Diaries: FC = () => {
     ]);
   
     if (result) {
+      console.log(result)
        const { value}= result;
-      const { diary, user: _user } = await http.post<
-        Partial<Diary>,
-        { diary: Diary; user: User }
-      >('/diaries/', {
+      const { diary, user: _user } = await http.post< Partial<Diary>, { diary: Diary; user: User }>('/diaries/', {
         title:value[0],
         type: value[1],
         userId: user?.id,
       });
+      console.log(diary)
+      console.log(_user)
       if (diary && user) {
         dispatch(addDiary([diary] as Diary[]));
         //dispatch(addDiary([diary] as Diary[]));
@@ -120,22 +111,28 @@ const Diaries: FC = () => {
   
 
   return (
-    <div style={{ padding: '1em 0.4em' }}>
+    <div style={{ padding: '1em 0.4em' }} >
       <Switch>
+
         <Route path="/diary/:id">
           <DiaryEntriesList />
         </Route>
+        
         <Route path="/">
-          <div className={classes.butt}>
-          <Button onClick={createDiary} variant="contained" >Create New</Button>
-          <ul className={classes.rootlist}>
+          <div style={{display:'flex', justifyContent:'center'}}>
+          <Button onClick={createDiary}  variant="contained" >Create New Diary</Button>
+          </div>
+          
+          <div>
           {diaries.map((diary, idx) => (
             <DiaryTile key={idx} diary={diary} />
           ))}
-          </ul>
-        
           </div>
+          
         </Route>
+
+
+        
       </Switch>
     </div>
   );

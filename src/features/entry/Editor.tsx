@@ -17,11 +17,10 @@ import { makeStyles } from '@material-ui/core/styles';
 
 
 const useStyles = makeStyles((theme) => ({
-  dis: {
-    marginTop:theme.spacing(2)
-  },
-  
-
+ 
+   edit:{
+     margin:theme.spacing(2)
+   }
   
 }));
 
@@ -29,9 +28,7 @@ const Editor: FC = () => {
 
   const classes = useStyles();
 
-  const { currentlyEditing: entry, canEdit, activeDiaryId } = useSelector(
-    (state: RootState) => state.editor
-  );
+  const { currentlyEditing: entry, canEdit, activeDiaryId } = useSelector((state: RootState) => state.editor );
 
   const [editedEntry, updateEditedEntry] = useState(entry);
 
@@ -65,35 +62,33 @@ const Editor: FC = () => {
     dispatch(setCanEdit(false));
   };
 
+
+
+
   useEffect(() => {
     updateEditedEntry(entry);
   }, [entry]);
+
+
 
   return (
     <div >
 
       
-      <div className={classes.dis}>
+      <div >
         {entry && !canEdit ? (
-          <div className={classes.dis}>
-          <h4>
-            {entry.title}
-            <a
-              href="#edit"
-              onClick={(e) => {
-                e.preventDefault();
-                if (entry != null) {
-                  dispatch(setCanEdit(true));
-                }
-              }}
-              
-            >
+          <div className={classes.edit} >
+           <h4>{entry.title}
+           <a href="#edit" onClick={(e) => {e.preventDefault(); if (entry != null) {dispatch(setCanEdit(true));}}}>
               (Edit)
             </a>
           </h4>
-          </div>
+        </div>
+
         ) : (
-          <div className={classes.dis}>
+          <div className={classes.edit} >
+
+            
           <TextField
             label="Entry"
             variant="outlined"
@@ -119,13 +114,14 @@ const Editor: FC = () => {
   
 
 
-       <div className={classes.dis}>
-      {entry && !canEdit ? (
+       <div >
+      {entry && !canEdit ? (<div className={classes.edit}>
         <Markdown>{entry.content}</Markdown>
+        </div>
       ) : (
-        <>
-      
-        <div className={classes.dis}>
+        
+       <div>
+        <div className={classes.edit} >
           <TextareaAutosize
             rowsMax={4}
             disabled={!canEdit}
@@ -137,7 +133,8 @@ const Editor: FC = () => {
                   ...editedEntry,
                   content: e.target.value,
                 });
-              } else {
+              } 
+              else {
                 updateEditedEntry({
                   title: '',
                   content: e.target.value,
@@ -146,16 +143,19 @@ const Editor: FC = () => {
             }}
           />
           </div>
-          <div className={classes.dis}>
+
+
+          <div className={classes.edit}>
           <Button onClick={saveEntry} variant="contained" disabled={!canEdit}>
             Save
           </Button>
           </div>
-          
-        </>
+          </div>
+        
       )}
-
       </div>
+
+      
     </div>
   );
 };

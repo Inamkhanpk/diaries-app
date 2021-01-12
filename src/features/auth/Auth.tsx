@@ -1,62 +1,76 @@
 import React, { FC, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { User } from '../../interfaces/user.interface';
-//import * as Yup from 'yup';
+import { useForm ,Controller} from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import Grid from '@material-ui/core/Grid'
+import FormControl from '@material-ui/core/FormControl'
+import Button from '@material-ui/core/Button'
+import TextField from '@material-ui/core/TextField'
+import Paper from '@material-ui/core/Paper'
+import { makeStyles } from '@material-ui/core/styles';
 import http from '../../services/api';
 import { saveToken, setAuthState } from './authSlice';
 import { setUser } from './userSlice';
 import { AuthResponse } from '../../services/mirage/routes/user';
 import { useAppDispatch } from '../../store';
-import Grid from '@material-ui/core/Grid'
-import Button from '@material-ui/core/Button'
-import TextField from '@material-ui/core/TextField'
-import Paper from '@material-ui/core/Paper'
-//import classes from '*.module.css';
-import { makeStyles } from '@material-ui/core/styles';
-
-// const schema = Yup.object().shape({
-//   username: Yup.string()
-//     .required('What? No username?')
-//     .max(16, 'Username cannot be longer than 16 characters'),
-//   password: Yup.string().required('Without a password, "None shall pass!"'),
-//   email: Yup.string().email('Please provide a valid email address (abc@xy.z)'),
-// });
+import { User } from '../../interfaces/user.interface';
 
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    width:'25%',
-    padding:theme.spacing(2),
-  },
-  apply:{
-    marginTop:theme.spacing(24),
+   root:{
+     marginTop:theme.spacing(20)
+   },
+   paper:{
+     width:'25%',
+     padding:theme.spacing(2),
+     [theme.breakpoints.down('md')]: {
+      width:'50%'
+    },
+   },
+   dis:{
+     margin:theme.spacing(2)
+   },
+   dismid:{
+     display:'flex',
+     justifyContent:"center",
+     margin:theme.spacing(2)
+   },
+   disend:{
     display:'flex',
-    justifyContent:'center',
-    alignItems:'center'
-  },
-  
-  textfield:{
-    marginTop:theme.spacing(2)
-  }
+    justifyContent:"center",
+    margin:theme.spacing(2),
+    cursor: 'pointer', 
+    opacity: 0.7 
+
+   }
 
   
 }));
 
 const Auth: FC = () => {
+
   const classes = useStyles();
-  const { handleSubmit, register, errors } = useForm<User>({
-    //validationSchema: schema,
+
+  const schema = yup.object().shape({
+    username: yup.string().required('What? No username?').max(16, 'Username cannot be longer than 16 characters'),
+    password: yup.string().required('Without a password, "None shall pass!"'),
+    email: yup.string().email('Please provide a valid email address (abc@xy.z)'),
   });
+
+  const { handleSubmit,register,  errors,control } = useForm<User>({
+  resolver: yupResolver(schema)
+  });
+
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
 
-  const submitForm = (data: User) => {
+  const onSubmit = (data: User) => {
+
     const path = isLogin ? '/auth/login' : '/auth/signup';
-    http
-      .post<User, AuthResponse>(path, data)
-      .then((res) => {
-        if (res) {
+    http.post<User, AuthResponse>(path, data)
+        .then((res) => {
+          if (res) {
           const { user, token } = res;
           dispatch(saveToken(token));
           dispatch(setUser(user));
@@ -71,100 +85,125 @@ const Auth: FC = () => {
       });
   };
 
+  
+
   return (
-    <div>
+    <Grid container  justify="center" className={classes.root}>
       
 
-        <form onSubmit={handleSubmit(submitForm)}>
-
-         
-      <div className={classes.apply}>
-
-       <Paper className={classes.root}>
-         
         
-          <Grid item xs={12} md={12}>
-            <Grid container justify="center" >
-          <div className={classes.textfield}>
-            <TextField
-             ref={register} 
-             name="username" 
-             placeholder="Username" 
-             />
-            {errors && errors.username && (
-              <p >{errors.username.message}</p>
-            )}
-          </div>
-          </Grid>
-          </Grid>
 
+         
+      
 
-          <Grid item xs={12} md={12}>
-            <Grid container justify="center">
-          <div className={classes.textfield}>
-            <TextField
-              ref={register}
-              name="password"
-              type="password"
-              placeholder="Password"
+       <Paper className={classes.paper}  >
+       <form onSubmit={handleSubmit(onSubmit)}>
+       
+       <div className={classes.dis}>
+       <FormControl fullWidth  variant="outlined">
+         <Controller
+              name="username"
+              as={
+                <TextField
+                  id="username"
+                  inputRef={register}
+                  helperText={errors.username ? errors.username?.message : null}
+                  variant="outlined"
+                  label="Username"
+                  />
+              }
+              control={control}
+              defaultValue=""
+              rules={{
+                required: 'Required',
+                
+              }}
             />
-            {errors && errors.password && (
-              <p >{errors.password.message}</p>
-            )}
-          </div>
-          </Grid>
-          </Grid>
+        </FormControl>
+        </div>
+      
+      <div className={classes.dis}>
+      <FormControl fullWidth  variant="outlined">
+        <Controller
+              name="password"
+              as={
+                <TextField
+                type="password"
+                  id="password"
+                  inputRef={register}
+                  helperText={errors.password ? errors.password?.message : null}
+                  variant="outlined"
+                  label="Password"
+                />
+              }
+              control={control}
+              defaultValue=""
+              rules={{
+                required: 'Required',
+               
+              }}
+            />
+         </FormControl>
+         </div>
 
 
+         
+          <div className={classes.dis}>
           {!isLogin && (
-            <Grid item xs={12} md={12}>
-            <Grid container justify="center">
-            <div className={classes.textfield}>
-              <TextField
-                ref={register}
-                name="email"
-                placeholder="Email (optional)"
-              />
-              {errors && errors.email && (
-                <p >{errors.email.message}</p>
-              )}
-            </div>
-            </Grid>
-            </Grid>
-          )}
-
-           <Grid item xs={12} md={12}>
-            <Grid container justify="center">
-          <div className={classes.textfield}>
-            <Button type="submit" disabled={loading} variant="contained">
+            <FormControl fullWidth  variant="outlined">
+              <Controller
+              name="email"
+              as={
+                <TextField
+                  id="email"
+                  inputRef={register}
+                  helperText={errors.email ? errors.email?.message: null}
+                  variant="outlined"
+                  label="Email"
+                  />
+              }
+              control={control}
+              defaultValue=""
+              rules={{
+                required: 'Required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                  message: 'invalid email address'
+                }
+              }}
+            />
+         
+          </FormControl>
+            )}
+           </div>
+           
+          <div className={classes.dismid}>
+            <Button type="submit" disabled={loading} variant="contained" >
               {isLogin ? 'Login' : 'Create account'}
             </Button>
           </div>
-          </Grid>
-            </Grid>
+          
 
 
-            <Grid item xs={12} md={12}>
-            <Grid container justify="center">
-              <div className={classes.textfield}>
+           
+         <div className={classes.disend} >
           <Button
             onClick={() => setIsLogin(!isLogin)}
-             variant="contained"
+             variant="contained" type="submit"
             >
             {isLogin ? 'No account? Create one' : 'Already have an account?'}
           </Button>
           </div>
-          </Grid>
-            </Grid>
           
-         
+          
+          </form>
 
           </Paper>
-          </div>
           
-        </form>
+          
+  
       
-    </div>
+    </Grid>
   );
 };
 

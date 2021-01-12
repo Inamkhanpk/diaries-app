@@ -12,6 +12,7 @@ export interface AuthResponse {
 
 const login = (schema: any, req: Request): AuthResponse | Response => {
   const { username, password } = JSON.parse(req.requestBody);
+  console.log(username)
   const user = schema.users.findBy({ username });
   if (!user) {
     return handleErrors(null, 'No user with that username exists');
@@ -29,6 +30,7 @@ const login = (schema: any, req: Request): AuthResponse | Response => {
 const signup = (schema: any, req: Request): AuthResponse | Response => {
 
   const data = JSON.parse(req.requestBody);
+  console.log(data)
   const exUser = schema.users.findBy({ username: data.username });
   if (exUser) {
     return handleErrors(null, 'A user with that username already exists.');
